@@ -1,0 +1,77 @@
+
+Vagrant.configure("2") do |config|
+
+  config.vm.provider "vmware_desktop" do |v|
+    v.gui = true
+    v.vmx["guestOS"] = "ubuntu-64"
+    v.vmx["memsize"] = "2048"
+    v.vmx["ethernet0.vnet"] = "VMnet2"
+    v.vmx["ethernet0.displayName"] = "VMnet2"
+  end  
+
+  config.vm.define "ubuntu1" do |ubuntu1|
+    ubuntu1.vm.box = "generic/ubuntu2004"
+    ubuntu1.vm.network "private_network", ip: "192.168.100.5"
+    ubuntu1.vm.hostname = "ubuntu1"
+      ubuntu1.vm.provision "file", source: "id_rsa.pub", destination: "/home/vagrant/.ssh/"
+
+      ubuntu1.vm.provision "shell", inline: <<-SHELL
+      cat "/home/vagrant/.ssh/id_rsa.pub" >> "/home/vagrant/.ssh/authorized_keys"
+      apt-get update
+      apt-get install -y
+      echo "Provisioning on ${HOSTNAME} finished..."
+      SHELL
+  end
+
+  config.vm.define "ubuntu2" do |ubuntu2|
+    ubuntu2.vm.box = "generic/ubuntu2004"
+    ubuntu2.vm.network "private_network", ip: "192.168.100.6"
+    ubuntu2.vm.hostname = "ubuntu2"
+
+      ubuntu2.vm.provision "file", source: "id_rsa.pub", destination: "/home/vagrant/.ssh/"
+      ubuntu2.vm.provision "shell", inline: <<-SHELL
+      cat "/home/vagrant/.ssh/id_rsa.pub" >> "/home/vagrant/.ssh/authorized_keys"
+      apt-get update
+      apt-get install -y
+      echo "Provisioning on ${HOSTNAME} finished..."
+      SHELL
+  end
+
+  config.vm.define "ubuntu3" do |ubuntu3|
+    ubuntu3.vm.box = "generic/ubuntu2004"
+    ubuntu3.vm.network "private_network", ip: "192.168.100.7"
+    ubuntu3.vm.hostname = "ubuntu3"
+      ubuntu3.vm.provision "file", source: "id_rsa.pub", destination: "/home/vagrant/.ssh/"
+      ubuntu3.vm.provision "shell", inline: <<-SHELL
+      cat "/home/vagrant/.ssh/id_rsa.pub" >> "/home/vagrant/.ssh/authorized_keys"
+      apt-get update
+      apt-get install -y
+      echo "Provisioning on ${HOSTNAME} finished..."
+      SHELL
+  end
+
+  config.vm.define "ansible" do |ansible|
+    ansible.vm.box = "generic/ubuntu2004"
+    ansible.vm.network "private_network", ip: "192.168.100.8"
+    ansible.vm.hostname = "ansible"
+      ansible.vm.provision "file", source: "id_rsa.pub", destination: "/home/vagrant/.ssh/"
+      ansible.vm.provision "file", source: "id_rsa", destination: "/home/vagrant/.ssh/"
+      ansible.vm.provision "shell", inline: <<-SHELL
+      sudo chmod 600 /home/vagrant/.ssh/id_rsa
+      sudo chmod 600 /home/vagrant/.ssh/id_rsa.pub
+      sudo apt-get update
+      sudo apt-get install -y
+      sudo apt update
+      sudo apt install software-properties-common
+      sudo add-apt-repository --yes --update ppa:ansible/ansible
+      sudo apt install ansible -y
+      echo "Provisioning on ${HOSTNAME} finished..."
+      SHELL
+  end      
+  
+ 
+    
+end
+
+
+
